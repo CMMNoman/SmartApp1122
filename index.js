@@ -1,6 +1,6 @@
 const express = require('express')
 const app = express()
-const port = 8000
+const port = process.env.PORT || 1337;
 
 const User = require('./User')
 const Ambulance = require('./Ambulance')
@@ -21,5 +21,6 @@ app.use((req,res,next)=> {
   err.status = 404
   next(err)
 });
+
 
 app.listen(port, () => { console.log(`SmartApp Api listening on port ${port}`) })
