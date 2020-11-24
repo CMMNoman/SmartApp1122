@@ -120,10 +120,8 @@ router.post('/Update', (req, res, next) => {
       } else {
         response.all(`UPDATE INCIDENT SET Name = '${Name}', Contact_Number = '${Contact_Number}', How = '${How}', Injured_Person = ${Injured_Person}, Ambulance_Needed = ${Ambulance_Needed}, Situation = '${Situation}', Address = '${Address}', Location = '${Location}', Created_Date = '${Created_Date}', Status = '${Status}' WHERE ID = '${ID}'`, (error, result, fields) => {
           if (error) {
-            
             res.status(400).send({ error: error })
           } else {
-            
             res.send({ message: 'Incident Updated Successfully', iid: ID })
           }
         })
@@ -140,21 +138,18 @@ router.get('/GetDetailByID/:IID', (req, res, next) => {
       const { IID } = req.params
       response.all(`SELECT I.Name AS I_Name, I.HOW AS I_How, I.Contact_Number AS I_Contact_Number, I.Injured_Person AS I_Injured_Person, I.Ambulance_Needed AS I_Ambulance_Needed, I.Situation AS I_Situation, I.Address AS I_Address, I.Location AS I_Location, I.Created_Date AS I_Created_Date, I.Status AS I_Status, AAH.AIDS, H.NAME AS H_Name, H.Phone_No AS H_Phone_No, H.Address AS H_Address, H.Location AS H_Location FROM ASSIGNED_AMBULANCE_HOSPITAL AAH INNER JOIN INCIDENT I ON AAH.IID = I.ID INNER JOIN HOSPITAL H ON AAH.HID = H.ID WHERE AAH.IID = '${IID}'`, (error, result, fields) => {
         if (error) {
-          
           res.status(400).send({ error: error })
         } else {
           var incidentDetails = result[0]
           var aidsJoin = ''
-          result[0].AIDS.split(',').forEach((aid) => {
+          result[0].aids.split(',').forEach((aid) => {
             aidsJoin += `'${aid}',`
           })
           aidsJoin = aidsJoin.substr(0, aidsJoin.length - 1)
           response.all(`SELECT A.ID, A.Name, A.Reg_No, U.First_Name AS Op_Name, A.Op_Phone_No, A.Location, A.Status FROM user U INNER JOIN AMBULANCE A ON U.ID = A.Op_ID WHERE A.ID IN (${aidsJoin}) ORDER BY A.ID`, (error, result, fields) => {
             if (error) {
-              
               res.status(400).send({ error: error })
             } else {
-              
               incidentDetails.Ambulances = result
               res.send({ incidentDetails: incidentDetails })
             }
@@ -172,12 +167,11 @@ router.get('/MarkAsResolved/:IID', (req, res, next) => {
     if (isSuccess) {
       const { IID } = req.params
       response.all(`SELECT AIDS FROM ASSIGNED_AMBULANCE_HOSPITAL WHERE IID = '${IID}'`, (error, result, fields) => {
-        if (error) {
-          
+        if (error) {        
           res.status(400).send({ error: error })
         } else {
           var aidsJoin = ''
-          result[0].AIDS.split(',').forEach((aid) => {
+          result[0].aids.split(',').forEach((aid) => {
             aidsJoin += `'${aid}',`
           })
           aidsJoin = aidsJoin.substr(0, aidsJoin.length - 1)
@@ -209,12 +203,10 @@ router.get('/GetIncidentsByUserID/:UID', (req, res, next) => {
   connectDB((isSuccess, response) => {
     if (isSuccess) {
       const { UID } = req.params
-      response.all(`SELECT I.* FROM USER U INNER JOIN AMBULANCE A ON U.ID = A.Op_ID INNER JOIN ASSIGNED_AMBULANCE_HOSPITAL AAH ON AAH.AIDS LIKE CONCAT('%',A.ID, '%') INNER JOIN INCIDENT I ON I.ID = AAH.IID WHERE U.ID = '${UID}'`, (error, result, fields) => {
+      response.all(`SELECT I.* FROM USER U INNER JOIN AMBULANCE A ON U.ID = A.Op_ID INNER JOIN ASSIGNED_AMBULANCE_HOSPITAL AAH ON AAH.AIDS LIKE '%' || A.ID ||'%' INNER JOIN INCIDENT I ON I.ID = AAH.IID WHERE U.ID = '${UID}'`, (error, result, fields) => {
         if (error) {
-          
           res.status(400).send({ error: error })
         } else {
-          
           res.send({ incidents: result })
         }
       })
@@ -228,12 +220,10 @@ router.get('/GetIncidentDetailAmbulanceByID/:UID/:IID', (req, res, next) => {
   connectDB((isSuccess, response) => {
     if (isSuccess) {
       const { UID, IID } = req.params
-      response.all(`SELECT I.Name AS I_Name, I.HOW AS I_How, I.Contact_Number AS I_Contact_Number, I.Injured_Person AS I_Injured_Person, I.Ambulance_Needed AS I_Ambulance_Needed, I.Situation AS I_Situation, I.Address AS I_Address, I.Location AS I_Location, I.Created_Date AS I_Created_Date, I.Status AS I_Status, A.ID AS A_ID, A.Name AS A_Name, A.Reg_No AS A_Reg_No, U.First_Name AS A_Op_Name, A.Op_Phone_No AS A_Op_Phone_No, A.Location AS A_Location, A.Status AS A_Status, H.NAME AS H_Name, H.Phone_No AS H_Phone_No, H.Address AS H_Address, H.Location AS H_Location FROM INCIDENT I INNER JOIN ASSIGNED_AMBULANCE_HOSPITAL AAH ON AAH.IID = I.ID INNER JOIN AMBULANCE A ON AAH.AIDS LIKE CONCAT('%', A.ID, '%') INNER JOIN USER U ON U.ID = A.Op_ID INNER JOIN HOSPITAL H ON H.ID = AAH.HID WHERE I.ID = '${IID}' AND U.ID = '${UID}'`, (error, result, fields) => {
+      response.all(`SELECT I.Name AS I_Name, I.HOW AS I_How, I.Contact_Number AS I_Contact_Number, I.Injured_Person AS I_Injured_Person, I.Ambulance_Needed AS I_Ambulance_Needed, I.Situation AS I_Situation, I.Address AS I_Address, I.Location AS I_Location, I.Created_Date AS I_Created_Date, I.Status AS I_Status, A.ID AS A_ID, A.Name AS A_Name, A.Reg_No AS A_Reg_No, U.First_Name AS A_Op_Name, A.Op_Phone_No AS A_Op_Phone_No, A.Location AS A_Location, A.Status AS A_Status, H.NAME AS H_Name, H.Phone_No AS H_Phone_No, H.Address AS H_Address, H.Location AS H_Location FROM INCIDENT I INNER JOIN ASSIGNED_AMBULANCE_HOSPITAL AAH ON AAH.IID = I.ID INNER JOIN AMBULANCE A ON AAH.AIDS LIKE '%' || A.ID || '%' INNER JOIN USER U ON U.ID = A.Op_ID INNER JOIN HOSPITAL H ON H.ID = AAH.HID WHERE I.ID = '${IID}' AND U.ID = '${UID}'`, (error, result, fields) => {
         if (error) {
-          
           res.status(400).send({ error: error })
         } else {
-          
           res.send({ incidentDetails: result[0] })
         }
       })
@@ -249,18 +239,16 @@ router.get('/Delete/:IID', (req, res, next) => {
       const { IID } = req.params
       response.all(`SELECT AIDS FROM ASSIGNED_AMBULANCE_HOSPITAL WHERE IID = '${IID}'`, (error, result, fields) => {
         if (error) {
-          
           res.status(400).send({ error: error })
         } else {
           if (result.length > 0) {
             var aidsJoin = ''
-            result[0].AIDS.split(',').forEach((aid) => {
+            result[0].aids.split(',').forEach((aid) => {
               aidsJoin += `'${aid}',`
             })
             aidsJoin = aidsJoin.substr(0, aidsJoin.length - 1)
             response.all(`UPDATE AMBULANCE SET STATUS = 'Available' WHERE ID IN (${aidsJoin})`, (error, result, fields) => {
               if (error) {
-                
                 res.status(400).send({ error: error })
               }
             })
@@ -268,10 +256,8 @@ router.get('/Delete/:IID', (req, res, next) => {
           response.all(`DELETE FROM ASSIGNED_AMBULANCE_HOSPITAL WHERE IID = '${IID}'`)
           response.all(`DELETE FROM INCIDENT WHERE ID = '${IID}'`, (error, result, fields) => {
             if (error) {
-              
               res.status(400).send({ error: error })
             } else {
-              
               res.send({ message: 'Deleted' })
             }
           })
@@ -289,10 +275,8 @@ router.get('/GetIncidentsByCreatorID/:UID', (req, res, next) => {
       const { UID } = req.params
       response.all(`SELECT * FROM INCIDENT WHERE CREATED_BY = '${UID}'`, (error, result, fields) => {
         if (error) {
-          
           res.status(400).send({ error: error })
         } else {
-          
           res.send({ incidents: result })
         }
       })

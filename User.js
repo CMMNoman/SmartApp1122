@@ -25,7 +25,7 @@ router.post('/Register', (req, res, next) => {
         
         res.status(400).send({ message: `Following Fileds Are Missing: ${requiredFields.substr(0, requiredFields.length - 2)}` })
       } else {
-        response.all(`SELECT * FROM USER WHERE Email =  '${Email}'`, (error, result, fields) => {
+        response.all(`SELECT * FROM USER WHERE Email =  '${Email}' COLLATE NOCASE`, (error, result, fields) => {
           if (error) {
             
             res.status(400).send({ error: error })
@@ -65,12 +65,12 @@ router.get('/Login/:Email/:Password', (req, res, next) => {
       } if (requiredFields) {
         res.status(400).send({ message: `Following Fileds Are Missing: ${requiredFields.substr(0, requiredFields.length - 2)}` })
       } else {
-        response.all(`SELECT * FROM USER WHERE Email = '${Email}'`, (error, result, fields) => {
+        response.all(`SELECT * FROM USER WHERE Email = '${Email}' COLLATE NOCASE`, (error, result, fields) => {
           if (error) {
             res.status(400).send({ error: error })
           } else {
             if (result && result.length > 0) {
-              response.all(`SELECT * FROM USER WHERE Email = '${Email}' AND Password = '${Password}'`, (error, result, fields) => {
+              response.all(`SELECT * FROM USER WHERE Email = '${Email}' AND Password = '${Password}' COLLATE NOCASE`, (error, result, fields) => {
                 if (error) {
                   res.status(400).send({ error: error })
                 } else {

@@ -30,7 +30,7 @@ router.post('/Add', (req, res, next) => {
       } if (requiredFields) {
         res.status(400).send({ message: `Following Fileds Are Missing: ${requiredFields.substr(0, requiredFields.length - 2)}` })
       } else {
-        response.all(`SELECT * FROM USER WHERE Email =  '${Op_Email}'`, (error, result, fields) => {
+        response.all(`SELECT * FROM USER WHERE Email =  '${Op_Email}' COLLATE NOCASE`, (error, result, fields) => {
           if (error) {
             res.status(400).send({ error: error })
           } else if (result && result.length > 0) {
@@ -43,7 +43,7 @@ router.post('/Add', (req, res, next) => {
                   res.status(400).send({ error: error })
                 } else {
                   const aid = common.getUUIDv4()
-                  response.all(`INSERT INTO AMBULANCE (ID, Name, Reg_No, Op_ID, Op_Phone_No, Location, Status) VALUES ('${aid}', '${Name}', '${Reg_No}', '${uid}', '${Op_Phone_No}', '${Location}', 'Available')`, (error, result, fields) => {
+                  response.all(`INSERT INTO AMBULANCE (ID, Name, Reg_No, Op_ID, Op_Phone_No, Location, Status, Current_Location) VALUES ('${aid}', '${Name}', '${Reg_No}', '${uid}', '${Op_Phone_No}', '${Location}', 'Available', '0,0')`, (error, result, fields) => {
                     if (error) {
                       res.status(400).send({ error: error })
                     } else {
@@ -174,14 +174,14 @@ router.get('/Delete/:AID', (req, res, next) => {
   connectDB((isSuccess, response) => {
     if (isSuccess) {
       const { AID } = req.params
-      response.all(`SELECT * FROM ASSIGNED_AMBULANCE_HOSPITAL WHERE AIDS LIKE CONCAT('%', '${AID}', '%')`, (error, result, fields) => {
+      response.all(`SELECT * FROM ASSIGNED_AMBULANCE_HOSPITAL WHERE AIDS LIKE '%${AID}%'`, (error, result, fields) => {
         if (error) {
           res.status(400).send({ error: error })
         } else {
           if (result.length > 0) {
             res.send({ message: `Can't delete right now because it is assigned to an incident.` })
           } else {
-            response.all(`DELETE FROM USER WHERE ROLE = 'AMBULANCE' AND ID = (SELECT Op_ID FROM AMBULANCE WHERE ID = '${AID}')`)
+            response.all(`DELETE FROM USER WHERE ROLE = 'Ambulance' AND ID = (SELECT Op_ID FROM AMBULANCE WHERE ID = '${AID}')`)
             response.all(`DELETE FROM AMBULANCE WHERE ID = '${AID}'`, (error, result, fields) => {
               if (error) {
                 res.status(400).send({ error: error })

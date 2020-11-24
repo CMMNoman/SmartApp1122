@@ -53,12 +53,10 @@ router.post('/AssignAmbulancesHospital', (req, res, next) => {
 router.get('/GetAll', (req, res, next) => {
   connectDB((isSuccess, response) => {
     if (isSuccess) {
-      response.all(`SELECT * FROM USER WHERE ROLE = 'DISPATCHER'`, (error, result, fields) => {
+      response.all(`SELECT * FROM USER WHERE ROLE = 'Dispatcher'`, (error, result, fields) => {
         if (error) {
-          
           res.status(400).send({ error: error })
         } else {
-          
           res.send({ dispatchers: result })
         }
       })
@@ -72,12 +70,10 @@ router.get('/Delete/:UID', (req, res, next) => {
   connectDB((isSuccess, response) => {
     if (isSuccess) {
       const { UID } = req.params
-      response.all(`DELETE FROM USER WHERE ROLE = 'DISPATCHER' AND ID = '${UID}'`, (error, result, fields) => {
-        if (error) {
-          
+      response.all(`DELETE FROM USER WHERE ROLE = 'Dispatcher' AND ID = '${UID}'`, (error, result, fields) => {
+        if (error) {          
           res.status(400).send({ error: error })
         } else {
-          
           res.send({ message: 'Deleted' })
         }
       })

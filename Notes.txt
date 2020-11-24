@@ -1,2 +1,0 @@
-yarn init
-yarn add express sqlite3 md5
